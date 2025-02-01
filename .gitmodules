@@ -1,0 +1,4 @@
+[submodule "deps/MetaPreprocessor"]
+	path = deps/MetaPreprocessor
+	url = https://github.com/PhucXDoan/MetaPreprocessor
+	branch = main
