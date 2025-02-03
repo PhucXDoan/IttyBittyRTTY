@@ -10,6 +10,7 @@ def ROOT(*subpaths):
 	)
 
 TARGET_MCU = 'atmega328p'
+USART_BAUD = 9600
 
 COMPILER_SETTINGS = (
 	# Miscellaneous flags.
@@ -313,6 +314,40 @@ def flash():
 			-P {get_programmer_port(quiet=True, none_ok=False)}
 			-D -Uflash:w:"{pathlib.PosixPath(ROOT('./build/IttyBittyRTTY.hex'))}"
 	''')
+
+@CLICommand('Open the COM serial port of the ST-LINK.')
+def talk():
+
+	# The only reason why PowerShell is used here is because there's no convenient way
+	# in Python to read a single character from STDIN with no blocking and buffering.
+	# Furthermore, the serial port on Windows seem to be buffered up, so data before the
+	# port is opened for reading is available to fetch; PySerial only returns data sent after
+	# the port is opened.
+
+	portid = get_programmer_port(quiet=True, none_ok=False)
+
+	execute(
+		bash = f'''
+			picocom --baud={USART_BAUD} --quiet --imap=lfcrlf {portid}
+		''',
+		pwsh = f'''
+			$port = new-Object System.IO.Ports.SerialPort {portid},{USART_BAUD},None,8,one;
+			$port.Open();
+			try {{
+				while ($true) {{
+					Write-Host -NoNewline $port.ReadExisting();
+					if ([System.Console]::KeyAvailable) {{
+						$port.Write([System.Console]::ReadKey($true).KeyChar);
+					}}
+					Start-Sleep -Milliseconds 1;
+				}}
+			}} finally {{
+				$port.Close();
+			}}
+		''',
+		# For closing the serial port.
+		keyboard_interrupt_ok=True,
+	)
 
 @CLICommand(f'Show usage of `{ROOT(os.path.basename(__file__))}`.')
 def help(
