@@ -1,18 +1,64 @@
 #!/usr/bin/env python3
-import re, os, sys, types, shlex, pathlib, subprocess, contextlib, collections, time, inspect, io, builtins, itertools
+import os, sys, types, shlex, pathlib, subprocess, contextlib, collections, time, inspect, builtins, itertools
 
 ################################################################ Configuration ################################################################
 
-def HERE(*subpaths):
+def ROOT(*subpaths):
 	return pathlib.Path(
 		pathlib.Path(__file__).absolute().relative_to(pathlib.Path.cwd(), walk_up=True).parent,
 		*subpaths
 	)
 
+TARGET_MCU = 'atmega328p'
+
+COMPILER_SETTINGS = (
+	# Miscellaneous flags.
+	f'''
+		-Os
+		-std=gnu11
+		-fmax-errors=1
+		-fno-strict-aliasing
+		-mmcu={TARGET_MCU}
+	'''
+
+	# Defines.
+	f'''
+	'''
+
+	# Warning configuration.
+	f'''
+		-Werror
+		-Wall
+		-Wextra
+		-Wswitch-enum
+		-Wundef
+		-Wfatal-errors
+		-Wstrict-prototypes
+		-Wshadow
+		-Wswitch-default
+
+		-Wno-unused-function
+		-Wno-main
+		-Wno-double-promotion
+		-Wno-conversion
+		-Wno-unused-variable
+		-Wno-unused-parameter
+		-Wno-comment
+		-Wno-unused-but-set-variable
+		-Wno-format-zero-length
+		-Wno-unused-label
+	'''
+
+	# Search path.
+	f'''{'\n'.join(f'-I "{ROOT(path)}"' for path in '''
+		./build
+	'''.split())}'''
+)
+
 ################################################################ Helpers ################################################################
 
 try:
-	sys.path += [str(HERE('./deps/MetaPreprocessor'))]
+	sys.path += [str(ROOT('./deps/MetaPreprocessor'))]
 	import MetaPreprocessor
 	Meta = MetaPreprocessor.Meta
 except ImportError:
@@ -87,11 +133,11 @@ def execute(default=None, *, bash=None, cmd=None, pwsh=None, keyboard_interrupt_
 						return code
 					else:
 						sys.exit(f'# Command resulted in non-zero exit code: {code}.')
-			except KeyboardInterrupt as e:
+			except KeyboardInterrupt as err:
 				if keyboard_interrupt_ok:
 					pass
 				else:
-					raise e
+					raise err
 
 ################################################################ CLI Commands ################################################################
 
@@ -121,7 +167,6 @@ def CLICommand(description):
 			names = names[1:]
 
 		# All parameters to the CLI command will be defined using the default values in the function's parameter list.
-
 		parameters = []
 		assert len(names) == len(details)
 		for name, (kind, about) in zip(names, details):
@@ -165,9 +210,9 @@ def CLICommand(description):
 
 	return decorator
 
-@CLICommand(f'Delete the `{HERE('build')}` folder.')
+@CLICommand(f'Delete the `{ROOT('build')}` folder.')
 def clean():
-	build = HERE('build')
+	build = ROOT('build')
 	execute(
 		bash = f'''
 			rm -rf {build}
@@ -180,13 +225,26 @@ def clean():
 @CLICommand('Compile and generate the binary for flashing.')
 def build():
 
+	################################ Meta-Preprocessing ################################
+
+	#
+	# Determine files to meta-preprocess.
+	#
+
 	metapreprocessor_file_paths = [
-		HERE('./src/RTTY.c')
+		str(pathlib.Path(root, file_name))
+		for root, dirs, file_names in ROOT('./src').walk()
+		for file_name in file_names
+		if file_name.endswith(('.c', '.h'))
 	]
+
+	#
+	# Begin meta-preprocessing!
+	#
 
 	try:
 		MetaPreprocessor.do(
-			output_dir_path    = str(HERE('./build/meta')),
+			output_dir_path    = str(ROOT('./build')),
 			source_file_paths  = metapreprocessor_file_paths,
 			additional_context = {
 			},
@@ -198,22 +256,69 @@ def build():
 			f'# See the above meta-preprocessor error.'
 		)
 
-	execute(lines_of(f'''
-		avr-gcc -O0 -mmcu=atmega328p -o {HERE('./build/RTTY.elf')} {HERE('./src/RTTY.c')}
-		avr-objcopy -O ihex -j .text -j .data {HERE('./build/RTTY.elf')} {HERE('./build/RTTY.hex')}
-	'''))
+	################################ Building ################################
+
+	# Compile source code.
+	execute(f'''
+		avr-gcc
+			{COMPILER_SETTINGS}
+			-o {ROOT('./build/IttyBittyRTTY.elf')}
+			{ROOT('./src/IttyBittyRTTY.c')}
+	''')
+
+	# Convert ELF into hex file.
+	execute(f'''
+		avr-objcopy
+			-O ihex
+			-j .text
+			-j .data
+			{ROOT('./build/IttyBittyRTTY.elf')}
+			{ROOT('./build/IttyBittyRTTY.hex')}
+	''')
+
+def get_programmer_port(*, quiet, none_ok):
+
+	import serial.tools.list_ports
+
+	portids = [
+		port.device
+		for port in serial.tools.list_ports.comports()
+		if (port.vid, port.pid) == (0x1A86, 0x7523) # "QinHeng Electronics CH340 serial converter".
+	]
+
+	match len(portids):
+
+		case 0:
+			if none_ok:
+				return None
+			else:
+				sys.exit('# No port associated with an AVR programmer found.')
+
+		case 1:
+			if not quiet:
+				print(f'# Using port for AVR programmer: `{portids[0]}`.')
+
+			return portids[0]
+
+		case _:
+			sys.exit('# Multiple ports associated with an AVR programmer found.')
 
 @CLICommand('Flash the binary to the MCU.')
 def flash():
-	execute(lines_of(f'''
-		avrdude -p atmega328p -c arduino -V -P /dev/ttyUSB0 -D -Uflash:w:"{HERE('./build/RTTY.hex')}"
-	'''))
+	execute(f'''
+		avrdude
+			-p {TARGET_MCU}
+			-c arduino
+			-V
+			-P {get_programmer_port(quiet=True, none_ok=False)}
+			-D -Uflash:w:"{pathlib.PosixPath(ROOT('./build/IttyBittyRTTY.hex'))}"
+	''')
 
-@CLICommand(f'Show usage of `{HERE(os.path.basename(__file__))}`.')
+@CLICommand(f'Show usage of `{ROOT(os.path.basename(__file__))}`.')
 def help(
 	specifically = ((str, None), 'Name of command to show help info on.'),
 ):
-	print(f'Usage: {HERE(os.path.basename(__file__))} [command]')
+	print(f'Usage: {ROOT(os.path.basename(__file__))} [command]')
 
 	#
 	# Determine the lines of the help text.
