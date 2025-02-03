@@ -2,17 +2,21 @@
 #include "defs.h"
 #include "misc.c"
 #include "gpio.c"
+#include "usart0.c"
 
-extern int
+extern noret void
 main(void)
 {
 	GPIO_init();
+	USART0_init();
+
+	//////////////////////////////////////////////////////////////// Main ////////////////////////////////////////////////////////////////
 
 	for (;;)
 	{
 		GPIO_TOGGLE(buildin_led);
-		delay_nop(1000000U);
+		char data = {0};
+		while (!USART0_rx_char(&data));
+		USART0_tx_char(data);
 	}
-
-	for(;;);
 }

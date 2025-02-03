@@ -18,6 +18,8 @@
 #define sizeof(...)             ((signed) sizeof(__VA_ARGS__))
 #define countof(...)            (sizeof(__VA_ARGS__) / sizeof((__VA_ARGS__)[0]))
 #define bitsof(...)             (sizeof(__VA_ARGS__) * 8)
+#define useret                  __attribute__((warn_unused_result))
+#define noret                   __attribute__((noreturn))
 #define static_assert(...)      _Static_assert(__VA_ARGS__, STRINGIFY(__VA_ARGS__))
 
 #include "primitives.meta"

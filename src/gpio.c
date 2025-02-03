@@ -9,7 +9,7 @@
 			Meta.overload('GPIO_TOGGLE', [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} ^= (1 << PORT{gpio.pin})))')
 			Meta.overload('GPIO_SET'   , [('NAME', gpio.name), 'VALUE'], f'((void) ((VALUE) ? GPIO_HIGH({gpio.name}) : GPIO_LOW({gpio.name})))')
 
-	with Meta.enter('extern void\nGPIO_init(void)'):
+	with Meta.enter('static void\nGPIO_init(void)'):
 
 		# Set GPIO's data direction (output/input). @/pg 59/sec 13.2.1/(328P).
 		for gpio in GPIOS:

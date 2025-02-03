@@ -9,8 +9,9 @@ def ROOT(*subpaths):
 		*subpaths
 	)
 
-TARGET_MCU = 'atmega328p'
-USART_BAUD = 9600
+TARGET_MCU  = 'atmega328p'
+F_OSC       = 16_000_000
+USART0_BAUD = 250_000
 
 COMPILER_SETTINGS = (
 	# Miscellaneous flags.
@@ -37,6 +38,7 @@ COMPILER_SETTINGS = (
 		-Wstrict-prototypes
 		-Wshadow
 		-Wswitch-default
+		-Wfloat-conversion
 
 		-Wno-unused-function
 		-Wno-main
@@ -248,6 +250,8 @@ def build():
 			output_dir_path    = str(ROOT('./build')),
 			source_file_paths  = metapreprocessor_file_paths,
 			additional_context = {
+				'F_OSC'       : F_OSC,
+				'USART0_BAUD' : USART0_BAUD,
 			},
 		)
 	except MetaPreprocessor.MetaError as err:
@@ -328,10 +332,10 @@ def talk():
 
 	execute(
 		bash = f'''
-			picocom --baud={USART_BAUD} --quiet --imap=lfcrlf {portid}
+			picocom --baud={USART0_BAUD} --quiet --imap=lfcrlf {portid}
 		''',
 		pwsh = f'''
-			$port = new-Object System.IO.Ports.SerialPort {portid},{USART_BAUD},None,8,one;
+			$port = new-Object System.IO.Ports.SerialPort {portid},{USART0_BAUD},None,8,one;
 			$port.Open();
 			try {{
 				while ($true) {{
