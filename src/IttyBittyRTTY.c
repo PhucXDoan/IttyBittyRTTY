@@ -1,17 +1,16 @@
 #include <avr/io.h>
 #include "defs.h"
 #include "misc.c"
+#include "gpio.c"
 
 extern int
 main(void)
 {
-	DDRB |= (1 << DDB5);
+	GPIO_init();
 
 	for (;;)
 	{
-		PORTB |= (1 << PORTB5);
-		delay_nop(1000000U);
-		PORTB &= ~(1 << PORTB5);
+		GPIO_TOGGLE(buildin_led);
 		delay_nop(1000000U);
 	}
 
