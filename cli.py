@@ -10,7 +10,7 @@ def ROOT(*subpaths):
 	)
 
 TARGET_MCU  = 'atmega328p'
-F_OSC       = 16_000_000
+F_OSC       = 16_000_000 # Also referred to as F_CPU.
 USART0_BAUD = 250_000
 
 COMPILER_SETTINGS = (
@@ -25,6 +25,7 @@ COMPILER_SETTINGS = (
 
 	# Defines.
 	f'''
+		-D F_CPU={F_OSC}
 	'''
 
 	# Warning configuration.

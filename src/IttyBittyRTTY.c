@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <util/delay.h>
 #include "defs.h"
 #include "misc.c"
 #include "gpio.c"
