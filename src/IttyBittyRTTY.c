@@ -1,4 +1,6 @@
 #include <avr/io.h>
+#include "defs.h"
+#include "misc.c"
 
 extern int
 main(void)
@@ -8,9 +10,9 @@ main(void)
 	for (;;)
 	{
 		PORTB |= (1 << PORTB5);
-		for (long long i = 0; i < 100000; i += 1);
+		delay_nop(1000000U);
 		PORTB &= ~(1 << PORTB5);
-		for (long long i = 0; i < 100000; i += 1);
+		delay_nop(1000000U);
 	}
 
 	for(;;);
