@@ -4,6 +4,7 @@
 /*
 	GPIOS = (
 		GPIO('buildin_led', 'B5', 'output'),
+		GPIO('transmitter', 'D6', 'OC0A'  ),
 	)
 */
 
