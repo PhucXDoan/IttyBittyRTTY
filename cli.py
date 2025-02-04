@@ -20,6 +20,7 @@ COMPILER_SETTINGS = (
 		-std=gnu11
 		-fmax-errors=1
 		-fno-strict-aliasing
+		-fshort-enums
 		-mmcu={TARGET_MCU}
 	'''
 
@@ -38,7 +39,6 @@ COMPILER_SETTINGS = (
 		-Wfatal-errors
 		-Wstrict-prototypes
 		-Wshadow
-		-Wswitch-default
 		-Wfloat-conversion
 
 		-Wno-unused-function

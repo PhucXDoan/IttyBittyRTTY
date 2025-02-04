@@ -31,14 +31,20 @@ USART0_init(void)
 	UCSR0B = (1 << TXEN0) | (1 << RXEN0);
 }
 
-static void
-USART0_tx_char(char value)
+#define USART0_tx(...) STR_fmt_builder(_USART0_tx_callback, 0, __VA_ARGS__)
+static enum StrFmtBuilderCallbackResult
+_USART0_tx_callback(void* context, char* data, u16 len)
 {
-	// Wait for there to be space available to push data. @/pg 171/sec 20.8.2/(328P).
-	while (!(UCSR0A & (1 << UDRE0)));
+	for (u16 i = 0; i < len; i += 1)
+	{
+		// Wait for there to be space available to push data. @/pg 171/sec 20.8.2/(328P).
+		while (!(UCSR0A & (1 << UDRE0)));
 
-	// Push the data to be transmitted. @/pg 159/sec 19.10.1/(328P).
-	UDR0 = value;
+		// Push the data to be transmitted. @/pg 159/sec 19.10.1/(328P).
+		UDR0 = data[i];
+	}
+
+	return StrFmtBuilderCallbackResult_continue;
 }
 
 static useret b8          // Data available?

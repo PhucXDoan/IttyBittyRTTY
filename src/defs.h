@@ -3,7 +3,7 @@
 /* #meta GPIOS : GPIO
 /*
 	GPIOS = (
-		GPIO('buildin_led', 'B5', 'output'),
+		GPIO('builtin_led', 'B5', 'output'),
 		GPIO('transmitter', 'D6', 'OC0A'  ),
 	)
 */
@@ -21,6 +21,7 @@
 #define bitsof(...)             (sizeof(__VA_ARGS__) * 8)
 #define useret                  __attribute__((warn_unused_result))
 #define noret                   __attribute__((noreturn))
+#define sorry                   sorry_();
 #define static_assert(...)      _Static_assert(__VA_ARGS__, STRINGIFY(__VA_ARGS__))
 
 #include "primitives.meta"
@@ -45,3 +46,30 @@
 			static_assert(sizeof({name}) == {size});
 		''')
 */
+
+// TODO Flash strings.
+#define str(...) ((str) { ("" __VA_ARGS__), sizeof("" __VA_ARGS__) })
+typedef struct
+{
+	char* data;
+	u16   len;
+} str;
+
+//////////////////////////////////////////////////////////////// str.c ////////////////////////////////////////////////////////////////
+
+enum StrFmtBuilderCallbackResult
+{
+	StrFmtBuilderCallbackResult_continue,
+	StrFmtBuilderCallbackResult_break,
+};
+
+typedef useret enum StrFmtBuilderCallbackResult StrFmtBuilderCallback(void* context, char* data, u16 len);
+
+enum StrShowIntStyle
+{
+	StrShowIntStyle_unsigned,
+	StrShowIntStyle_signed,
+	StrShowIntStyle_binary,
+	StrShowIntStyle_hex_lower,
+	StrShowIntStyle_hex_upper,
+};
