@@ -115,6 +115,12 @@ set_signal(enum Signal signal)
 		(((clock_select_bits               >> 0) & 1) << CS00 );
 
 	OCR0A = compare_value;
+
+	// Reset the timer's counter so the frequency transistion is done in a
+	// consistent manner. If we don't do this, the counter might be larger
+	// than the new compare value, to which the next compare-match will not
+	// occur until after the overflow of the counter.
+	TCNT0 = 0;
 }
 
 extern noret void
@@ -131,8 +137,10 @@ main(void)
 		if (USART0_rx_char(&(char) {0}))
 		{
 			GPIO_TOGGLE(builtin_led);
-			current_signal = current_signal == Signal_mark ? Signal_space : Signal_mark;
-			set_signal(current_signal);
 		}
+		current_signal = current_signal == Signal_mark ? Signal_space : Signal_mark;
+		set_signal(current_signal);
+		GPIO_TOGGLE(trigger);
+		_delay_ms(1.0 / 45.45 * 1000.0);
 	}
 }

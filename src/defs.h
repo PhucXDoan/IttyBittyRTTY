@@ -1,9 +1,11 @@
 //////////////////////////////////////////////////////////////// Configurations ////////////////////////////////////////////////////////////////
 
+// TODO Use aliasing instead.
 /* #meta GPIOS : GPIO
 /*
 	GPIOS = (
 		GPIO('builtin_led', 'B5', 'output'),
+		GPIO('trigger'    , 'D4', 'output'),
 		GPIO('transmitter', 'D6', 'OC0A'  ),
 	)
 */
