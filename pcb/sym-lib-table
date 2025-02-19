@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "deps")(type "KiCad")(uri "/home/phucxdoan/Documents/IttyBittyRTTY/deps/pcb/deps.kicad_sym")(options "")(descr ""))
+)
