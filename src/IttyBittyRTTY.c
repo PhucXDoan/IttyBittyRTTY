@@ -132,18 +132,30 @@ main(void)
 
 	//////////////////////////////////////////////////////////////// Main ////////////////////////////////////////////////////////////////
 
-	enum Signal current_signal = {0};
-	for (;;)
-	{
-		if (USART0_rx_char(&(char) {0}))
+	#if 0
+		str message = str("Hello World!");
+		for (;;)
 		{
-			GPIO_TOGGLE(builtin_led);
-		}
-		current_signal = current_signal == Signal_mark ? Signal_space : Signal_mark;
-		set_signal(current_signal);
-		GPIO_TOGGLE(trigger);
-		_delay_ms(1.0 / 45.45 * 1000.0);
-	}
+			for (u8 i = 0; i < message.len; i += 1)
+			{
+				for (u8 j = 0; j < bitsof(message.data[i]); j += 1)
+				{
+					if (message.data[i] & (1 << j))
+					{
+						set_signal(Signal_mark);
+					}
+					else
+					{
+						set_signal(Signal_space);
+					}
 
-	for(;;);
+					// Period of baud rate for 45.45 b/s.
+					_delay_ms(1.0 / 45.45 * 1000.0);
+				}
+			}
+		}
+	#else
+		set_signal(Signal_mark);
+		for(;;);
+	#endif
 }
