@@ -8,7 +8,10 @@ STR_show_int(char* dst, u16 dst_size, u64 value, enum StrShowIntStyle style, cha
 	{
 		case StrShowIntStyle_unsigned:
 		{
+			//
 			// Determine the characters of the string going right-to-left.
+			//
+
 			char tmp_buf[26] = {0};
 			u8   tmp_len     = 0;
 			u64  remaining   = value;
@@ -34,18 +37,23 @@ STR_show_int(char* dst, u16 dst_size, u64 value, enum StrShowIntStyle style, cha
 			}
 			while (remaining);
 
-			// String fits within destination buffer?
+			//
+			// Truncate string to fit within destination buffer.
+			//
+
 			if (tmp_len <= dst_size)
 			{
 				result.len = tmp_len;
 			}
-			// String needs to be truncated.
 			else
 			{
 				result.len = dst_size;
 			}
 
+			//
 			// Copy string into destination buffer.
+			//
+
 			memmove(result.data, tmp_buf + countof(tmp_buf) - tmp_len, result.len);
 		} break;
 
@@ -150,21 +158,30 @@ STR_fmt_builder_va_list(StrFmtBuilderCallback* callback, void* context, char* fm
 		char* stream = fmt;
 		while (true)
 		{
+			//
 			// Determine how far we can go before the string ends or there's a format specifier.
+			//
+
 			i32 raw_len = 0;
 			while (stream[raw_len] != '\0' && stream[raw_len] != '%')
 			{
 				raw_len += 1;
 			}
 
+			//
 			// There's characters we can submit without any additional processing?
+			//
+
 			if (raw_len)
 			{
 				CALLBACK(stream, raw_len);
 				stream += raw_len;
 			}
 
+			//
 			// Format specifier found?
+			//
+
 			if (stream[0] == '%')
 			{
 				//
@@ -179,24 +196,35 @@ STR_fmt_builder_va_list(StrFmtBuilderCallback* callback, void* context, char* fm
 
 				#include "str.length_modifier.meta"
 				/*
-					# Make sure to order it in such a way that no faulty short-circuiting in the if-else statements will occur.
-					modifiers = ['hh', 'h', 'll']
+					MODIFIERS = (
+						'hh',
+						'h',
+						'll',
+					)
 
+					#
 					# Enumerations of the supported length modifiers.
-					Meta.enums('LengthModifier', None, ['none'] + modifiers)
+					#
+
+					Meta.enums('LengthModifier', None, ('none',) + MODIFIERS)
 					Meta.line('''
 						enum LengthModifier length_modifier = {0};
 					''')
 
+					#
 					# Determine the length modifier used (if there even is one).
-					for condition, modifier in Meta.elifs({
-						' && '.join(f"stream[{index}] == '{character}'" for index, character in enumerate(modifier)) : modifier
-						for modifier in modifiers
-					}):
-						Meta.line(f'''
-							length_modifier  = LengthModifier_{modifier};
-							stream          += {len(modifier)};
-						''')
+					#
+
+					for modifieri, modifier in enumerate(MODIFIERS):
+
+						if_word   = 'else if' if modifieri else 'if'
+						condition = ' && '.join(f"stream[{ci}] == '{c}'" for ci, c in enumerate(modifier))
+
+						with Meta.enter(f'{if_word} ({condition})'):
+							Meta.line(f'''
+								length_modifier  = LengthModifier_{modifier};
+								stream          += {len(modifier)};
+							''')
 				*/
 
 				//
@@ -286,7 +314,10 @@ STR_fmt_builder_va_list(StrFmtBuilderCallback* callback, void* context, char* fm
 				CALLBACK(substr.data, substr.len);
 			}
 
+			//
 			// Format string entirely processed?
+			//
+
 			if (stream[0] == '\0')
 			{
 				break;

@@ -1,14 +1,17 @@
 static void
 USART0_init(void)
 {
+	//
 	// Determine the values to write to the in registers to get the desired baud rate.
+	//
+
 	#include "USART0_baud_configurer.meta"
 	/*
 		for u2x0, ubrr0 in (
 			(0, F_OSC / (16 * USART0_BAUD) - 1), # Assuming we don't need the U2Xn bit. @/pg 146/tbl 19-1/(328P).
 			(1, F_OSC / (8  * USART0_BAUD) - 1), # Assuming we       need the U2Xn bit. "
 		):
-			# Value is valid for UBBR0? @/pg 162/sec 19.10.5/(328P).
+			# Calculated value fits wthin UBBR0? @/pg 162/sec 19.10.5/(328P).
 			if ubrr0.is_integer() and 0 <= ubrr0 < (1 << 12):
 				Meta.define('USART0_U2X0_init' , u2x0      )
 				Meta.define('USART0_UBBR0_init', int(ubrr0))
@@ -17,17 +20,26 @@ USART0_init(void)
 			assert False, f'Desired USART0 baud rate of {USART0_BAUD} is not achievable.'
 	*/
 
-	// If needed, doubles the transmission speed. @/pg 159/sec 19.10.2/(328P).
+	//
+	// If needed, double the transmission speed. @/pg 159/sec 19.10.2/(328P).
+	//
+
 	UCSR0A = (USART0_U2X0_init << U2X0);
 
-	// Sets the divider to achieve the desired baud rate. @/pg 146/tbl 19-1/(328P).
+	//
+	// Set the divider to achieve the desired baud rate. @/pg 146/tbl 19-1/(328P).
+	//
+
 	UBRR0 = USART0_UBBR0_init;
 
 	UCSR0C =
 		(0 << UPM01 ) | (0 << UPM00 ) | // No parity bit. @/pg 161/tbl 19-5/(328P).
 		(1 << UCSZ01) | (1 << UCSZ00);  // Data size of 8 bits. @/pg 162/tbl 19-7/(328P).
 
+	//
 	// Enable transmission and reception of data. @/pg 171/sec 20.8.3/(328P).
+	//
+
 	UCSR0B = (1 << TXEN0) | (1 << RXEN0);
 }
 

@@ -1,13 +1,22 @@
 //////////////////////////////////////////////////////////////// Configurations ////////////////////////////////////////////////////////////////
 
-// TODO Use aliasing instead.
-/* #meta GPIOS : GPIO
+/* #meta GPIOS, SIGNALS, F_CLKIO
 /*
-	GPIOS = (
-		GPIO('builtin_led', 'B5', 'output'),
-		GPIO('trigger'    , 'D4', 'output'),
-		GPIO('transmitter', 'B1', 'OC1A'  ),
+	# TODO Look into ATmega328P's clock system.
+	F_CLKIO = 16_000_000 - 43_500
+
+	GPIOS = Meta.Table(
+		('name'       , 'kind'          , 'port', 'number'),
+		('builtin_led', 'output'        , 'B'   , 5       ),
+		('trigger'    , 'output'        , 'D'   , 4       ),
+		('transmitter', 'output_compare', 'B'   , 1       ),
 	)
+
+	SIGNALS = {
+		'none'  : 0,
+		'mark'  : 2295,
+		'space' : 2125,
+	}
 */
 
 //////////////////////////////////////////////////////////////// Primitives ////////////////////////////////////////////////////////////////
@@ -75,3 +84,125 @@ enum StrShowIntStyle
 	StrShowIntStyle_hex_lower,
 	StrShowIntStyle_hex_upper,
 };
+
+//////////////////////////////////////////////////////////////// GPIO ////////////////////////////////////////////////////////////////
+
+#include "defs.gpio.meta"
+/*
+	for gpio in GPIOS:
+
+		match gpio.kind:
+
+			case 'output': # @/pg 59/sec 13.2.1/(328P).
+				Meta.overload('GPIO_HIGH'  , [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} &= ~(1 << PORT{gpio.port}{gpio.number})))')
+				Meta.overload('GPIO_LOW'   , [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} |=  (1 << PORT{gpio.port}{gpio.number})))')
+				Meta.overload('GPIO_TOGGLE', [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} ^=  (1 << PORT{gpio.port}{gpio.number})))')
+				Meta.overload('GPIO_SET'   , [('NAME', gpio.name), 'VALUE'], f'((void) ((VALUE) ? GPIO_HIGH({gpio.name}) : GPIO_LOW({gpio.name})))')
+
+			case 'output_compare':
+				OUTPUT_COMPARE_PINS = {
+					('D', 6) : 'OC0A',
+					('D', 5) : 'OC0B',
+					('B', 1) : 'OC1A',
+					('B', 2) : 'OC1B',
+					('B', 3) : 'OC2A',
+					('D', 3) : 'OC2B',
+				}
+				assert (gpio.port, gpio.number) in OUTPUT_COMPARE_PINS, \
+					f"GPIO {gpio.port}{gpio.number} ({gpio.name}) doesn't correspond to any timer's output-compare pin."
+
+			case unknown:
+				assert False, unknown
+*/
+
+//////////////////////////////////////////////////////////////// Misc. ////////////////////////////////////////////////////////////////
+
+#define BAUD_PERIOD (1.0 / 45.45 * 1000.0) // Period of baud rate for 45.45 b/s.
+
+#include "timer_configurer.meta"
+/*
+	#
+	# Create enumeration of signals that could be sent.
+	#
+
+	Meta.enums('Signal', None, SIGNALS.keys())
+
+	#
+	# Calculate look-up table for configuring the timer to output the desired frequency.
+	#
+
+	with Meta.enter('static struct { u8 clksel; u16 compare_value; } SIGNAL_TABLE[] =', '{', '};', indented=True):
+
+		for signal, goal_freq in SIGNALS.items():
+
+			best = None
+
+			#
+			# Getting 0Hz output is easy; just use a 0Hz clock source.
+			#
+
+			if goal_freq == 0:
+				best = Meta.Obj(
+					compare_value = 0,
+					clksel        = 0,
+					error         = 0,
+				)
+
+			#
+			# Otherwise, we'll have to bruteforce some options.
+			#
+
+			else:
+
+				for clksel, divider in { # @/pg 110/tbl 15-6/(328P).
+					0b001 : 1,
+					0b010 : 8,
+					0b011 : 64,
+					0b100 : 256,
+					0b101 : 1024,
+				}.items():
+
+					#
+					# Different clock sources results in different frequencies
+					# that the counter will be incremented at. @/pg 110/tbl 15-6/(328P).
+					#
+
+					timer1_freq = F_CLKIO / divider
+
+					#
+					# Determine the closest compare value that'll output the desired frequency.
+					# Note that division of two must be done since a compare-match only accounts
+					# for half of a cycle.
+					#
+
+					compare_value = round(timer1_freq / goal_freq / 2 - 1)
+
+					#
+					# Determine the actual frequency that'd be generated and the error from it.
+					#
+
+					calculated_freq = timer1_freq / (compare_value + 1) / 2
+					error           = abs(calculated_freq / goal_freq - 1)
+
+					#
+					# The compare value has a limited range of 16 bits, so even if the error is
+					# the best so far, we wouldn't be able to actually use the value anyways.
+					# @/pg 111/sec 15.11.5/(328P).
+					#
+
+					if 0 <= compare_value <= 2**16-1:
+
+						# We found a better configuration that minimizes the error?
+						if best is None or error < best.error:
+							best = Meta.Obj(
+								compare_value = compare_value,
+								clksel        = clksel,
+								error         = error,
+							)
+
+			#
+			# Export the values to be used at run-time.
+			#
+
+			Meta.line(f'[Signal_{signal}] = {{ {best.clksel}, {best.compare_value} }}, // {goal_freq} Hz, {best.error * 100 :.4f}% error.')
+*/

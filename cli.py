@@ -317,10 +317,10 @@ def flash():
 			-c arduino
 			-V
 			-P {get_programmer_port(quiet=True, none_ok=False)}
-			-D -Uflash:w:"{pathlib.PosixPath(ROOT('./build/IttyBittyRTTY.hex'))}"
+			-D -Uflash:w:"{pathlib.PurePosixPath(ROOT('./build/IttyBittyRTTY.hex'))}"
 	''')
 
-@CLICommand('Open the COM serial port of the ST-LINK.')
+@CLICommand('Open the COM serial port of the dev-board.')
 def talk():
 
 	# The only reason why PowerShell is used here is because there's no convenient way
