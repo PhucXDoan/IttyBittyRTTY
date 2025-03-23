@@ -1,0 +1,26 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdarg.h>
+#include <string.h>
+#include "defs.h"
+#include "gpio.c"
+#include "misc.c"
+#include "str.c"
+#include "usart0.c"
+
+extern noret void
+main(void)
+{
+	//////////////////////////////////////////////////////////////// Initialization ////////////////////////////////////////////////////////////////
+
+	gpio_init();
+
+	//////////////////////////////////////////////////////////////// Main ////////////////////////////////////////////////////////////////
+
+	for (;;)
+	{
+		GPIO_TOGGLE(builtin_led);
+		_delay_ms(100.0);
+	}
+}

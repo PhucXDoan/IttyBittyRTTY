@@ -9,11 +9,16 @@ def ROOT(*subpaths):
 		*subpaths
 	)
 
+TARGETS = '''
+	Transmitter
+	Receiver
+'''.split()
+
 TARGET_MCU  = 'atmega328p'
 F_OSC       = 16_000_000 # Also referred to as F_CPU.
 USART0_BAUD = 250_000
 
-COMPILER_SETTINGS = (
+COMPILER_SETTINGS = lambda target: (
 	# Miscellaneous flags.
 	f'''
 		-Os
@@ -27,6 +32,7 @@ COMPILER_SETTINGS = (
 	# Defines.
 	f'''
 		-D F_CPU={F_OSC}
+		{'\n'.join(f'-D {t}={1 if t == target else 0}' for t in TARGETS)}
 	'''
 
 	# Warning configuration.
@@ -253,6 +259,7 @@ def build():
 			additional_context = {
 				'F_OSC'       : F_OSC,
 				'USART0_BAUD' : USART0_BAUD,
+				'TARGETS'     : TARGETS,
 			},
 		)
 	except MetaPreprocessor.MetaError as err:
@@ -264,23 +271,25 @@ def build():
 
 	################################ Building ################################
 
-	# Compile source code.
-	execute(f'''
-		avr-gcc
-			{COMPILER_SETTINGS}
-			-o {ROOT('./build/IttyBittyRTTY.elf')}
-			{ROOT('./src/IttyBittyRTTY.c')}
-	''')
+	for target in TARGETS:
 
-	# Convert ELF into hex file.
-	execute(f'''
-		avr-objcopy
-			-O ihex
-			-j .text
-			-j .data
-			{ROOT('./build/IttyBittyRTTY.elf')}
-			{ROOT('./build/IttyBittyRTTY.hex')}
-	''')
+		# Compile source code.
+		execute(f'''
+			avr-gcc
+				{COMPILER_SETTINGS(target)}
+				-o {ROOT(f'./build/{target}.elf')}
+				{ROOT(f'./src/{target}.c')}
+		''')
+
+		# Convert ELF into hex file.
+		execute(f'''
+			avr-objcopy
+				-O ihex
+				-j .text
+				-j .data
+				{ROOT(f'./build/{target}.elf')}
+				{ROOT(f'./build/{target}.hex')}
+		''')
 
 def get_programmer_port(*, quiet, none_ok):
 
@@ -310,14 +319,16 @@ def get_programmer_port(*, quiet, none_ok):
 			sys.exit('# Multiple ports associated with an AVR programmer found.')
 
 @CLICommand('Flash the binary to the MCU.')
-def flash():
+def flash(
+	target = (TARGETS, 'Target MCU to program.'),
+):
 	execute(f'''
 		avrdude
 			-p {TARGET_MCU}
 			-c arduino
 			-V
 			-P {get_programmer_port(quiet=True, none_ok=False)}
-			-D -Uflash:w:"{pathlib.PurePosixPath(ROOT('./build/IttyBittyRTTY.hex'))}"
+			-D -Uflash:w:"{pathlib.PurePosixPath(ROOT(f'./build/{target}.hex'))}"
 	''')
 
 @CLICommand('Open the COM serial port of the dev-board.')

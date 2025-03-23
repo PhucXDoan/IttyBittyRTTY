@@ -5,11 +5,17 @@
 	# TODO Look into ATmega328P's clock system.
 	F_CLKIO = 16_000_000 - 43_500
 
-	GPIOS = Meta.Table(
-		('name'       , 'kind'          , 'port', 'number'),
-		('builtin_led', 'output'        , 'B'   , 5       ),
-		('trigger'    , 'output'        , 'D'   , 4       ),
-		('transmitter', 'output_compare', 'B'   , 1       ),
+	GPIOS = Meta.Obj(
+		Transmitter = Meta.Table(
+			('name'       , 'kind'          , 'port', 'number'),
+			('builtin_led', 'output'        , 'B'   , 5       ),
+			('trigger'    , 'output'        , 'D'   , 4       ),
+			('transmitter', 'output_compare', 'B'   , 1       ),
+		),
+		Receiver = Meta.Table(
+			('name'       , 'kind'          , 'port', 'number'),
+			('builtin_led', 'output'        , 'B'   , 5       ),
+		),
 	)
 
 	SIGNALS = {
@@ -84,36 +90,6 @@ enum StrShowIntStyle
 	StrShowIntStyle_hex_lower,
 	StrShowIntStyle_hex_upper,
 };
-
-//////////////////////////////////////////////////////////////// GPIO ////////////////////////////////////////////////////////////////
-
-#include "defs.gpio.meta"
-/*
-	for gpio in GPIOS:
-
-		match gpio.kind:
-
-			case 'output': # @/pg 59/sec 13.2.1/(328P).
-				Meta.overload('GPIO_HIGH'  , [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} &= ~(1 << PORT{gpio.port}{gpio.number})))')
-				Meta.overload('GPIO_LOW'   , [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} |=  (1 << PORT{gpio.port}{gpio.number})))')
-				Meta.overload('GPIO_TOGGLE', [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} ^=  (1 << PORT{gpio.port}{gpio.number})))')
-				Meta.overload('GPIO_SET'   , [('NAME', gpio.name), 'VALUE'], f'((void) ((VALUE) ? GPIO_HIGH({gpio.name}) : GPIO_LOW({gpio.name})))')
-
-			case 'output_compare':
-				OUTPUT_COMPARE_PINS = {
-					('D', 6) : 'OC0A',
-					('D', 5) : 'OC0B',
-					('B', 1) : 'OC1A',
-					('B', 2) : 'OC1B',
-					('B', 3) : 'OC2A',
-					('D', 3) : 'OC2B',
-				}
-				assert (gpio.port, gpio.number) in OUTPUT_COMPARE_PINS, \
-					f"GPIO {gpio.port}{gpio.number} ({gpio.name}) doesn't correspond to any timer's output-compare pin."
-
-			case unknown:
-				assert False, unknown
-*/
 
 //////////////////////////////////////////////////////////////// Misc. ////////////////////////////////////////////////////////////////
 

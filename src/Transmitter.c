@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "defs.h"
+#include "gpio.c"
 #include "misc.c"
 #include "str.c"
 #include "usart0.c"
@@ -60,17 +61,7 @@ main(void)
 {
 	//////////////////////////////////////////////////////////////// Initialization ////////////////////////////////////////////////////////////////
 
-	#include "gpio_init.meta"
-	/*
-		for gpio in GPIOS:
-
-			# Make the GPIO be an output pin. @/pg 59/sec 13.2.1/(328P).
-			if gpio.kind in ('output', 'output_compare'):
-				Meta.line(f'''
-					DDR{gpio.port} |= (1 << DD{gpio.port}{gpio.number});
-				''')
-	*/
-
+	gpio_init();
 	USART0_init();
 
 	//////////////////////////////////////////////////////////////// Main ////////////////////////////////////////////////////////////////
