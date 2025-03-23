@@ -5,8 +5,9 @@
 /*
 	GPIOS = (
 		GPIO('builtin_led', 'B5', 'output'),
-		GPIO('trigger'    , 'D4', 'output'),
+		GPIO('button'     , 'D2', 'input' , pull='up'),
 		GPIO('transmitter', 'B1', 'OC1A'  ),
+		GPIO('trigger'    , 'D4', 'output'),
 	)
 */
 

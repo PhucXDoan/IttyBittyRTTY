@@ -8,6 +8,9 @@
 			Meta.overload('GPIO_TOGGLE', [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} ^= (1 << PORT{gpio.pin})))')
 			Meta.overload('GPIO_SET'   , [('NAME', gpio.name), 'VALUE'], f'((void) ((VALUE) ? GPIO_HIGH({gpio.name}) : GPIO_LOW({gpio.name})))')
 
+		if gpio.func == 'input':
+			Meta.overload('GPIO_READ', [('NAME', gpio.name)], f'(!!(PIN{gpio.port} & (1 << {gpio.number})))')
+
 	with Meta.enter('static void\nGPIO_init(void)'):
 
 		for gpio in GPIOS:
@@ -17,6 +20,22 @@
 				Meta.line(f'''
 					DDR{gpio.port} |= (1 << DD{gpio.port}{gpio.number});
 				''')
+
+			if gpio.func == 'input':
+				Meta.line(f'''
+					DDR{gpio.port} &= ~(1 << DD{gpio.port}{gpio.number});
+				''')
+				match gpio.pull:
+					case 'up':
+						Meta.line(f'''
+							PORT{gpio.port} |= (1 << PORT{gpio.port}{gpio.number});
+						''')
+					case 'down':
+						Meta.line(f'''
+							PORT{gpio.port} &= ~(1 << PORT{gpio.port}{gpio.number});
+						''')
+					case unknown:
+						assert False
 */
 
 /* #meta GPIO, OUTPUT_COMPARE_PINS
@@ -38,7 +57,7 @@
 	# GPIO constructor.
 	#
 
-	def GPIO(name, pin, func):
+	def GPIO(name, pin, func, **opts):
 
 		gpio = Meta.Obj(
 			name   = name,
@@ -46,13 +65,18 @@
 			port   = pin[0],
 			number = int(pin[1:]),
 			func   = func,
+			pull   = None,
 		)
 
 		match func:
 
-			# Pin will be used as a digital output.
+			# Pin will be used as an output.
 			case 'output':
 				pass
+
+			# Pin will be used as an input.
+			case 'input':
+				gpio.pull = opts.pop('pull')
 
 			# Pin will be used as the waveform generator's output. @/pg 76/fig 14-3/(328P).
 			case output_compare if output_compare in OUTPUT_COMPARE_PINS:
@@ -64,6 +88,8 @@
 			case unknown:
 				assert False, \
 					f'GPIO {pin} (`{name}`) has unknown function: `{unknown}`.'
+
+		assert not opts
 
 		return gpio
 */

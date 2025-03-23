@@ -75,6 +75,7 @@ set_signal(enum Signal signal)
 							error             = error,
 						)
 
+			print(best.error)
 			# Export the values to be used at run-time.
 			Meta.define(f'CS1_{frequency_name}'  , f'((u16) {best.clock_select_bits})')
 			Meta.define(f'OCR1A_{frequency_name}', f'((u16) {best.compare_value    })')
@@ -155,7 +156,40 @@ main(void)
 			}
 		}
 	#else
-		set_signal(Signal_mark);
-		for(;;);
+		b8 prev_button_state = true;
+
+		enum Signal curr_signal = Signal_mark;
+		set_signal(curr_signal);
+
+		for (;;)
+		{
+
+			curr_signal = curr_signal == Signal_mark ? Signal_space : Signal_mark;
+			set_signal(curr_signal);
+			_delay_ms(100.0);
+
+			GPIO_HIGH(trigger);
+
+			curr_signal = curr_signal == Signal_mark ? Signal_space : Signal_mark;
+			set_signal(curr_signal);
+			_delay_ms(100.0);
+
+			GPIO_LOW(trigger);
+
+			curr_signal = Signal_none;
+			set_signal(curr_signal);
+			_delay_ms(100.0);
+
+		//	b8 curr_button_state = GPIO_READ(button);
+
+		//	if (prev_button_state && !curr_button_state)
+		//	{
+		//		GPIO_TOGGLE(builtin_led);
+		//		curr_signal = curr_signal == Signal_mark ? Signal_space : Signal_mark;
+		//		set_signal(curr_signal);
+		//	}
+
+		//	prev_button_state = curr_button_state;
+		}
 	#endif
 }
