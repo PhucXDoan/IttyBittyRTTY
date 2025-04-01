@@ -61,6 +61,7 @@ main(void)
 {
 	//////////////////////////////////////////////////////////////// Initialization ////////////////////////////////////////////////////////////////
 
+	sei(); // Enable interrupts.
 	gpio_init();
 	USART0_init();
 
@@ -75,7 +76,7 @@ main(void)
 			{
 				// Start bit.
 				set_signal(Signal_mark);
-				_delay_ms(BAUD_PERIOD);
+				_delay_ms(BAUD_PERIOD_MS);
 
 				// Data bits.
 				for (u8 j = 0; j < bitsof(message.data[i]); j += 1)

@@ -200,6 +200,7 @@ STR_fmt_builder_va_list(StrFmtBuilderCallback* callback, void* context, char* fm
 						'hh',
 						'h',
 						'll',
+						'l',
 					)
 
 					#
@@ -256,6 +257,7 @@ STR_fmt_builder_va_list(StrFmtBuilderCallback* callback, void* context, char* fm
 							case LengthModifier_none : value = va_arg(args, unsigned          );          break;
 							case LengthModifier_hh   : value = va_arg(args, unsigned          ) & 0x00FF; break;
 							case LengthModifier_h    : value = va_arg(args, unsigned          ) & 0xFFFF; break;
+							case LengthModifier_l    : value = va_arg(args, unsigned long     );          break;
 							case LengthModifier_ll   : value = va_arg(args, unsigned long long);          break;
 						}
 
@@ -297,7 +299,7 @@ STR_fmt_builder_va_list(StrFmtBuilderCallback* callback, void* context, char* fm
 					default:
 					{
 						// Insert a grawlix and continue on processing the rest of the format string.
-						substr = str("#%!&");
+						substr = str("IDK#%!&");
 					} break;
 				}
 

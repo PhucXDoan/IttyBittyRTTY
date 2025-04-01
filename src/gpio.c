@@ -16,10 +16,17 @@
 						#
 
 						case 'output':
-							Meta.overload('GPIO_HIGH'  , [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} &= ~(1 << PORT{gpio.port}{gpio.number})))')
-							Meta.overload('GPIO_LOW'   , [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} |=  (1 << PORT{gpio.port}{gpio.number})))')
+							Meta.overload('GPIO_HIGH'  , [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} |=  (1 << PORT{gpio.port}{gpio.number})))')
+							Meta.overload('GPIO_LOW'   , [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} &= ~(1 << PORT{gpio.port}{gpio.number})))')
 							Meta.overload('GPIO_TOGGLE', [('NAME', gpio.name),        ], f'((void) (PORT{gpio.port} ^=  (1 << PORT{gpio.port}{gpio.number})))')
 							Meta.overload('GPIO_SET'   , [('NAME', gpio.name), 'VALUE'], f'((void) ((VALUE) ? GPIO_HIGH({gpio.name}) : GPIO_LOW({gpio.name})))')
+
+						#
+						# Macros for controlling output pins. @/pg 60/sec 13.2.4/(328P).
+						#
+
+						case 'input':
+							Meta.overload('GPIO_READ', [('NAME', gpio.name)], f'(!!(PIN{gpio.port} & (1 << PIN{gpio.port}{gpio.number})))')
 
 						#
 						# Ensure output-compare pin exists.
@@ -50,6 +57,11 @@
 						case 'output' | 'output_compare': # @/pg 59/sec 13.2.1/(328P).
 							Meta.line(f'''
 								DDR{gpio.port} |= (1 << DD{gpio.port}{gpio.number});
+							''')
+
+						case 'input':
+							Meta.line(f'''
+								DDR{gpio.port} &= ~(1 << DD{gpio.port}{gpio.number});
 							''')
 
 						case unknown:

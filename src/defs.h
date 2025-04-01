@@ -5,7 +5,7 @@
 	# TODO Look into ATmega328P's clock system.
 	F_CLKIO = 16_000_000 - 43_500
 
-	GPIOS = Meta.Obj(
+	GPIOS = Meta.Obj( # TODO Pull-ups?
 		Transmitter = Meta.Table(
 			('name'       , 'kind'          , 'port', 'number'),
 			('builtin_led', 'output'        , 'B'   , 5       ),
@@ -15,6 +15,8 @@
 		Receiver = Meta.Table(
 			('name'       , 'kind'          , 'port', 'number'),
 			('builtin_led', 'output'        , 'B'   , 5       ),
+			('signal'     , 'input'         , 'D'   , 5       ),
+			('trigger'    , 'output'        , 'B'   , 2       ),
 		),
 	)
 
@@ -93,7 +95,7 @@ enum StrShowIntStyle
 
 //////////////////////////////////////////////////////////////// Misc. ////////////////////////////////////////////////////////////////
 
-#define BAUD_PERIOD (1.0 / 45.45 * 1000.0) // Period of baud rate for 45.45 b/s.
+#define BAUD_PERIOD_MS (1.0 / 45.45 * 1000.0) // Period of baud rate for 45.45 b/s.
 
 #include "timer_configurer.meta"
 /*
