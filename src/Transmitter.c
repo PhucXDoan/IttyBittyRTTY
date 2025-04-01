@@ -67,19 +67,27 @@ main(void)
 
 	//////////////////////////////////////////////////////////////// Main ////////////////////////////////////////////////////////////////
 
-	#if 0
-		str message = str("Hello World!");
+	#if 1
+		set_signal(Signal_mark); // TODO A way to resynchronize?
+		_delay_ms(100.0);
+
+		str message = str("Doing taxes suck!");
 		for (;;)
 		{
 			// Data frames.
 			for (u8 i = 0; i < message.len; i += 1)
 			{
 				// Start bit.
-				set_signal(Signal_mark);
+				set_signal(Signal_space);
 				_delay_ms(BAUD_PERIOD_MS);
 
 				// Data bits.
-				for (u8 j = 0; j < bitsof(message.data[i]); j += 1)
+				for
+				(
+					i8 j = bitsof(message.data[i]) - 1;
+					j >= 0;
+					j -= 1
+				)
 				{
 					if (message.data[i] & (1 << j))
 					{
@@ -90,12 +98,12 @@ main(void)
 						set_signal(Signal_space);
 					}
 
-					_delay_ms(BAUD_PERIOD);
+					_delay_ms(BAUD_PERIOD_MS);
 				}
 
 				// Stop bit.
-				set_signal(Signal_space);
-				_delay_ms(BAUD_PERIOD);
+				set_signal(Signal_mark);
+				_delay_ms(BAUD_PERIOD_MS);
 			}
 		}
 	#else

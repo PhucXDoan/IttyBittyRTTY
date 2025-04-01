@@ -89,8 +89,16 @@ main(void)
 		// Process the UART data frame.
 		//
 
-		b8 data_available = {0};
-		u8 new_data       = 0;
+		enum DataStatus
+		{
+			DataStatus_none,
+			DataStatus_start_bit_error,
+			DataStatus_stop_bit_error,
+			DataStatus_success,
+		};
+
+		enum DataStatus data_status = {0};
+		u8              new_data    = 0;
 		{
 			static u16 elapsed_us = 0;
 			static u8  baud_nth   = 0;
@@ -108,7 +116,6 @@ main(void)
 					baud_nth   = 1; // Begin to decode the data frame.
 					midpoint   = false;
 					elapsed_us = 0;
-					GPIO_LOW(trigger);
 				}
 			}
 
@@ -126,21 +133,25 @@ main(void)
 						// Start bit signal is for some reason high?
 						if (signal)
 						{
-							baud_nth = 0; // Abort the data frame; might be noise.
+							baud_nth    = 0; // Abort the data frame; might be noise.
+							data_status = DataStatus_start_bit_error;
 						}
 					}
 					// Stop bit?
 					else if (baud_nth == 10)
 					{
-						if (!signal)
-						{
-							// TODO: Signal data frame error.
-						}
-
 						// We can stop early so we'll be immediately ready for the next data frame.
-						baud_nth       = 0;
-						data_available = true;
-						new_data       = data;
+						baud_nth = 0;
+
+						if (signal)
+						{
+							data_status = DataStatus_success;
+							new_data    = data;
+						}
+						else
+						{
+							data_status = DataStatus_stop_bit_error;
+						}
 					}
 					// Push the data bit.
 					else
@@ -156,9 +167,10 @@ main(void)
 					baud_nth   += 1;
 					elapsed_us -= (u16) BAUD_PERIOD_MS * 1000;
 					midpoint    = false;
-					GPIO_HIGH(trigger);
 				}
 			}
+
+			GPIO_SET(trigger, !!baud_nth);
 		}
 
 		//
@@ -166,11 +178,44 @@ main(void)
 		//
 
 		{
-			static u8 data_index = 0;
-			if (data_available)
+			static u8  heartbeat  = 0;
+			static u32 elapsed_us = 0;
+
+			elapsed_us += delta_us;
+
+			switch (data_status)
 			{
-				data_index += 1;
-				USART0_tx("%u : %u\n", data_index, new_data);
+				case DataStatus_none:
+				{
+					if (elapsed_us >= 1000000)
+					{
+						elapsed_us  = 0;
+						heartbeat  += 1;
+						USART0_tx("%u : Nothing new.\n", heartbeat);
+					}
+				} break;
+
+				case DataStatus_start_bit_error:
+				case DataStatus_stop_bit_error:
+				{
+					heartbeat += 1;
+					USART0_tx("%u : Frame error: %u.\n", heartbeat, data_status);
+				} break;
+
+				case DataStatus_success:
+				{
+					elapsed_us  = 0;
+					heartbeat  += 1;
+
+					if (32 <= new_data && new_data <= 126)
+					{
+						USART0_tx("%u : %u : '%c'\n", heartbeat, new_data, new_data);
+					}
+					else
+					{
+						USART0_tx("%u : %u\n", heartbeat, new_data);
+					}
+				} break;
 			}
 		}
 	}

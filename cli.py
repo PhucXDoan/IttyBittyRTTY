@@ -295,10 +295,14 @@ def get_programmer_port(*, quiet, none_ok):
 
 	import serial.tools.list_ports
 
+	all_ports = serial.tools.list_ports.comports()
 	portids = [
 		port.device
-		for port in serial.tools.list_ports.comports()
-		if (port.vid, port.pid) == (0x1A86, 0x7523) # "QinHeng Electronics CH340 serial converter".
+		for port in all_ports
+		if (port.vid, port.pid) in ( # TODO Honestly not sure why I used PID and VID here.
+			(0x1A86, 0x7523), # "QinHeng Electronics CH340 serial converter".
+			(0x2341, 0x0001), # "Arduino SA".
+		)
 	]
 
 	match len(portids):
@@ -307,7 +311,13 @@ def get_programmer_port(*, quiet, none_ok):
 			if none_ok:
 				return None
 			else:
-				sys.exit('# No port associated with an AVR programmer found.')
+				sys.exit(
+					f'# No port associated with an AVR programmer found.\n'
+					f'# List of potential ports: {''.join(
+						f'("{port.description}", 0x{port.vid :04X}, 0x{port.pid :04X})'
+						for port in all_ports if port.description != 'n/a'
+					)}'
+				)
 
 		case 1:
 			if not quiet:
