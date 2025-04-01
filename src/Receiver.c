@@ -66,7 +66,7 @@ main(void)
 			{
 				elapsed_us -= MICROSECONDS_PER_SAMPLE;
 
-				// Move the window update the histogram.
+				// Move the window; update the histogram.
 				histogram[ring_buffer[ring_index]] -= 1;
 				ring_buffer[ring_index]             = GPIO_READ(signal);
 				histogram[ring_buffer[ring_index]] += 1;
