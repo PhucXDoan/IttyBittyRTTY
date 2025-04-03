@@ -291,19 +291,32 @@ def build():
 				{ROOT(f'./build/{target}.hex')}
 		''')
 
-def get_programmer_port(*, quiet, none_ok):
+def get_programmer_port(*, quiet, none_ok, preferred_port_name=None):
 
 	import serial.tools.list_ports
 
 	all_ports = serial.tools.list_ports.comports()
-	portids = [
-		port.device
-		for port in all_ports
-		if (port.vid, port.pid) in ( # TODO Honestly not sure why I used PID and VID here.
-			(0x1A86, 0x7523), # "QinHeng Electronics CH340 serial converter".
-			(0x2341, 0x0001), # "Arduino SA".
-		)
-	]
+
+	if preferred_port_name is None:
+		portids = [
+			port.device
+			for port in all_ports
+			if (port.vid, port.pid) in ( # TODO Honestly not sure why I used PID and VID here.
+				(0x1A86, 0x7523), # "QinHeng Electronics CH340 serial converter".
+				(0x2341, 0x0001), # "Arduino SA".
+			)
+		]
+	else:
+		portids = [
+			port.device
+			for port in all_ports
+			if port.description == preferred_port_name
+		]
+
+	potential_ports_message = f'# List of potential ports:\n{''.join(
+		f'#    ("{port.description}", 0x{port.vid :04X}, 0x{port.pid :04X})\n'
+		for port in all_ports if port.description != 'n/a'
+	)}'
 
 	match len(portids):
 
@@ -311,13 +324,16 @@ def get_programmer_port(*, quiet, none_ok):
 			if none_ok:
 				return None
 			else:
-				sys.exit(
-					f'# No port associated with an AVR programmer found.\n'
-					f'# List of potential ports: {''.join(
-						f'("{port.description}", 0x{port.vid :04X}, 0x{port.pid :04X})'
-						for port in all_ports if port.description != 'n/a'
-					)}'
-				)
+				if preferred_port_name is None:
+					sys.exit(
+						f'# No port associated with an AVR programmer found.\n'
+						f'{potential_ports_message}'
+					)
+				else:
+					sys.exit(
+						f'# No port by the name "{preferred_port_name}" found.\n'
+						f'{potential_ports_message}'
+					)
 
 		case 1:
 			if not quiet:
@@ -326,18 +342,22 @@ def get_programmer_port(*, quiet, none_ok):
 			return portids[0]
 
 		case _:
-			sys.exit('# Multiple ports associated with an AVR programmer found.')
+			sys.exit(
+				'# Multiple ports associated with an AVR programmer found.\n'
+				f'{potential_ports_message}'
+			)
 
 @CLICommand('Flash the binary to the MCU.')
 def flash(
-	target = (TARGETS, 'Target MCU to program.'),
+	target    = (TARGETS    , 'Program of the target MCU.'),
+	port_name = ((str, None), 'Port name to find; otherwise, automatically determine it.'),
 ):
 	execute(f'''
 		avrdude
 			-p {TARGET_MCU}
 			-c arduino
 			-V
-			-P {get_programmer_port(quiet=True, none_ok=False)}
+			-P {get_programmer_port(quiet=True, none_ok=False, preferred_port_name=port_name)}
 			-D -Uflash:w:"{pathlib.PurePosixPath(ROOT(f'./build/{target}.hex'))}"
 	''')
 
