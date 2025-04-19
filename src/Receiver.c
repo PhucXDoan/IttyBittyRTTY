@@ -178,10 +178,22 @@ main(void)
 		//
 
 		{
-			static u8  heartbeat  = 0;
-			static u32 elapsed_us = 0;
+			static char buffer[32]     = {0};
+			static u8   buffer_indexer = 0;
+			static u8   heartbeat      = 0;
+			static u32  elapsed_us     = 0;
 
 			elapsed_us += delta_us;
+
+			enum PrintReason
+			{
+				PrintReason_none,
+				PrintReason_nothing_new,
+				PrintReason_frame_error,
+				PrintReason_new_data,
+			};
+
+			enum PrintReason print_reason = {0};
 
 			switch (data_status)
 			{
@@ -189,33 +201,46 @@ main(void)
 				{
 					if (elapsed_us >= 1000000)
 					{
-						elapsed_us  = 0;
-						heartbeat  += 1;
-						USART0_tx("%u : Nothing new.\n", heartbeat);
+						elapsed_us    = 0;
+						heartbeat    += 1;
+						print_reason  = PrintReason_nothing_new;
 					}
 				} break;
 
 				case DataStatus_start_bit_error:
 				case DataStatus_stop_bit_error:
 				{
-					heartbeat += 1;
-					USART0_tx("%u : Frame error: %u.\n", heartbeat, data_status);
+					heartbeat    += 1;
+					print_reason  = PrintReason_frame_error;
 				} break;
 
 				case DataStatus_success:
 				{
-					elapsed_us  = 0;
-					heartbeat  += 1;
-
-					if (32 <= new_data && new_data <= 126)
-					{
-						USART0_tx("%u : %u : '%c'\n", heartbeat, new_data, new_data);
-					}
-					else
-					{
-						USART0_tx("%u : %u\n", heartbeat, new_data);
-					}
+					elapsed_us                                = 0;
+					heartbeat                                += 1;
+					print_reason                              = PrintReason_new_data;
+					buffer[buffer_indexer % countof(buffer)]  = new_data;
+					buffer_indexer                           += 1;
 				} break;
+			}
+
+			if (print_reason)
+			{
+				USART0_tx("%u : ", heartbeat);
+				for (int i = 0; i < countof(buffer); i += 1)
+				{
+					char c = buffer[(buffer_indexer + i) % countof(buffer)];
+					USART0_tx("%c", (32 <= c && c <= 126) ? c : '.');
+				}
+
+				switch (print_reason)
+				{
+					case PrintReason_none        : break;
+					case PrintReason_nothing_new : USART0_tx(" : Nothing new."); break;
+					case PrintReason_frame_error : USART0_tx(" : Frame error."); break;
+					case PrintReason_new_data    : USART0_tx(" : New data."   ); break;
+				}
+				USART0_tx("\n");
 			}
 		}
 	}

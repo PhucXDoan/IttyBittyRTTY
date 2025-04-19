@@ -15,7 +15,7 @@
 		Receiver = Meta.Table(
 			('name'       , 'kind'          , 'port', 'number'),
 			('builtin_led', 'output'        , 'B'   , 5       ),
-			('signal'     , 'input'         , 'D'   , 5       ),
+			('signal'     , 'input'         , 'D'   , 6       ),
 			('trigger'    , 'output'        , 'B'   , 2       ),
 		),
 	)
