@@ -1,0 +1,131 @@
+(footprint "Trimmer 3362P"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -4.5 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "bcfbcf60-84ea-4b1d-b5a0-7e16adb40a4a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "Trimmer 3362P"
+		(at 0 4.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "5017600d-16cd-4ce6-81c5-6f05cb174946")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "5a482ef4-aa3e-4e36-9dcb-1b9b32a3d569")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "44faa683-b197-487d-b7b5-b0f3658659fa")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_rect
+		(start -3.5 -3.5)
+		(end 3.5 3.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "3c934ed3-7edd-479d-895a-31d8394d9553")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 6 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "7c93a774-66ff-4bc0-869d-730a97442445")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "" thru_hole circle
+		(at 2.54 0)
+		(size 1.8 1.8)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(solder_mask_margin 0)
+		(solder_paste_margin 0)
+		(clearance 0)
+		(thermal_bridge_width 0)
+		(thermal_gap 0)
+		(uuid "747d97c3-147c-4b43-a25b-a8ebaa1237cc")
+	)
+	(pad "1" thru_hole rect
+		(at -2.54 0)
+		(size 1.8 1.8)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(solder_mask_margin 0)
+		(solder_paste_margin 0)
+		(clearance 0)
+		(thermal_bridge_width 0)
+		(thermal_gap 0)
+		(uuid "5a9a2ace-d324-4a9e-8efc-9e5bdbfdafdc")
+	)
+	(pad "2" thru_hole circle
+		(at 0 -2.54)
+		(size 1.8 1.8)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(solder_mask_margin 0)
+		(solder_paste_margin 0)
+		(clearance 0)
+		(thermal_bridge_width 0)
+		(thermal_gap 0)
+		(uuid "4126a8e7-0d9b-4b04-ab41-62f71e7a746f")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../deps/pcb/Trimpot 3362P.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -0)
+		)
+	)
+)

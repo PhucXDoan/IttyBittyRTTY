@@ -1,0 +1,129 @@
+(footprint "LTR-516AD"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "SENSOR PHOTODIODE 940NM RADIAL")
+	(property "Reference" "REF**"
+		(at 0 -2.54 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "a6571f67-16bc-489e-a0ba-4897a535584c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "LTR-516AD"
+		(at 0 4.85 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "0189088c-7220-4b93-836b-f2fb626b2706")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://optoelectronics.liteon.com/upload/download/DS-50-93-0021/R516AD.pdf"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "53620ed6-3b9e-4599-9324-919df63576c1")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "SENSOR PHOTODIODE 940NM RADIAL"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "2c3ee1f5-7be2-458f-be68-474f773ca1ba")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -2 -1.5)
+		(end 2 -1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "e7687afd-eaea-49c8-90e8-6829884d03b0")
+	)
+	(fp_arc
+		(start 2 -1.5)
+		(mid 0 2.5)
+		(end -2 -1.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "ca12f520-831a-4064-93e0-77a1a3862a46")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 6.35 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "03f64e0f-a32f-4a83-bddf-33e128c673dc")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole rect
+		(at 1.27 0)
+		(size 1.8 1.8)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(solder_mask_margin 0)
+		(solder_paste_margin 0)
+		(clearance 0)
+		(thermal_bridge_width 0)
+		(thermal_gap 0)
+		(uuid "1bc29d26-a28d-4759-9920-726c2fa1e3b4")
+	)
+	(pad "2" thru_hole circle
+		(at -1.27 0)
+		(size 1.8 1.8)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(solder_mask_margin 0)
+		(solder_paste_margin 0)
+		(clearance 0)
+		(thermal_bridge_width 0)
+		(thermal_gap 0)
+		(uuid "acb2a25d-c835-408b-8b18-3bf381862a77")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../deps/pcb/LTR-516AD.STEP"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -0)
+		)
+	)
+)
