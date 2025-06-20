@@ -12,7 +12,7 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.1)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -59,8 +59,8 @@
 		(start -2 -1.5)
 		(end 2 -1.5)
 		(stroke
-			(width 0.1)
-			(type default)
+			(width 0.12)
+			(type solid)
 		)
 		(layer "F.SilkS")
 		(uuid "e7687afd-eaea-49c8-90e8-6829884d03b0")
@@ -70,8 +70,8 @@
 		(mid 0 2.5)
 		(end -2 -1.5)
 		(stroke
-			(width 0.1)
-			(type default)
+			(width 0.12)
+			(type solid)
 		)
 		(layer "F.SilkS")
 		(uuid "ca12f520-831a-4064-93e0-77a1a3862a46")
