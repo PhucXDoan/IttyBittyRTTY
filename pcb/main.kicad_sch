@@ -13106,7 +13106,7 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+5V")
+		(lib_id "power:+5VA")
 		(at 274.32 229.87 90)
 		(unit 1)
 		(exclude_from_sim no)
@@ -13114,7 +13114,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "bdc455e8-b6e2-4ef2-96d9-b3cd50b87cc7")
+		(uuid "c0b35610-5531-4a0f-bfa0-f7a13e655ef3")
 		(property "Reference" "#PWR018"
 			(at 278.13 229.87 0)
 			(effects
@@ -13124,7 +13124,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+5V"
+		(property "Value" "+5VA"
 			(at 270.51 229.8699 90)
 			(effects
 				(font
@@ -13151,7 +13151,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
+		(property "Description" "Power symbol creates a global label with name \"+5VA\""
 			(at 274.32 229.87 0)
 			(effects
 				(font
@@ -13161,7 +13161,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "78da0b18-1595-4126-bdd4-3af7dc12f7cb")
+			(uuid "a0e54522-f93f-474c-bda7-ae5c0bd86c07")
 		)
 		(instances
 			(project "main"

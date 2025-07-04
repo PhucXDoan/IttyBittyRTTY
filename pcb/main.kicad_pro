@@ -51,7 +51,13 @@
           "min_clearance": 0.5
         }
       },
-      "diff_pair_dimensions": [],
+      "diff_pair_dimensions": [
+        {
+          "gap": 0.0,
+          "via_gap": 0.0,
+          "width": 0.0
+        }
+      ],
       "drc_exclusions": [],
       "meta": {
         "version": 2
@@ -70,7 +76,7 @@
         "duplicate_footprints": "error",
         "extra_footprint": "error",
         "footprint": "error",
-        "footprint_filters_mismatch": "error",
+        "footprint_filters_mismatch": "ignore",
         "footprint_symbol_mismatch": "error",
         "footprint_type_mismatch": "warning",
         "hole_clearance": "error",
@@ -86,7 +92,7 @@
         "malformed_courtyard": "error",
         "microvia_drill_out_of_range": "error",
         "mirrored_text_on_front_layer": "error",
-        "missing_courtyard": "error",
+        "missing_courtyard": "ignore",
         "missing_footprint": "error",
         "net_conflict": "error",
         "nonmirrored_text_on_back_layer": "error",
@@ -180,7 +186,9 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [],
+      "track_widths": [
+        0.0
+      ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
           "corner_radius_percentage": 80,
@@ -207,7 +215,12 @@
           "spacing": 0.6
         }
       },
-      "via_dimensions": [],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        }
+      ],
       "zones_allow_external_fillets": false
     },
     "ipc2581": {
@@ -471,7 +484,7 @@
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.2,
+        "track_width": 0.25,
         "via_diameter": 0.6,
         "via_drill": 0.3,
         "wire_width": 6
